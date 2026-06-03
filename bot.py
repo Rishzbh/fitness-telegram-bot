@@ -4,7 +4,6 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 TOKEN = "8933000059:AAFVTe3rcCtY34aXzQEFW1wleRBdsS20XYs"
 CHAT_ID = 6071673615
-
 scheduler = AsyncIOScheduler()
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
