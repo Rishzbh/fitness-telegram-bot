@@ -13,3 +13,9 @@ app = Application.builder().token(TOKEN).build()
 app.add_handler(CommandHandler("start", start))
 
 app.run_polling()
+from datetime import datetime
+
+async def time_cmd(update, context):
+    await update.message.reply_text(str(datetime.now()))
+
+app.add_handler(CommandHandler("time", time_cmd))
