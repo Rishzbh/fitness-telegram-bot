@@ -2,7 +2,7 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-TOKEN = "YOUR_BOT_TOKEN"
+TOKEN = "8933000059:AAFVTe3rcCtY34aXzQEFW1wleRBdsS20XYs"
 CHAT_ID = 6071673615
 
 scheduler = AsyncIOScheduler()
