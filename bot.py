@@ -10,26 +10,13 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 async def time_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(str(datetime.now()))
-
-app = Application.builder().token(TOKEN).build()
-
-app.add_handler(CommandHandler("start", start))
-app.add_handler(CommandHandler("time", time_cmd))
-
-app.run_polling()async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "🏃 Fitness Coach Bot is running!"
+        str(datetime.now())
     )
 
 app = Application.builder().token(TOKEN).build()
 
 app.add_handler(CommandHandler("start", start))
+app.add_handler(CommandHandler("time", time_cmd))
 
 app.run_polling()
-from datetime import datetime
-
-async def time_cmd(update, context):
-    await update.message.reply_text(str(datetime.now()))
-
-app.add_handler(CommandHandler("time", time_cmd))
