@@ -48,7 +48,7 @@ async def start(
         "🏃 Fitness Coach Bot Running"
     )
 
-# ---------------- WALK QUESTION ----------------
+# ---------------- TASKS ----------------
 
 async def ask_walk(app):
 
@@ -69,7 +69,26 @@ async def ask_walk(app):
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
-# ---------------- BUTTON HANDLER ----------------
+async def ask_shake(app):
+
+    keyboard = [[
+        InlineKeyboardButton(
+            "✅ Yes",
+            callback_data="shake_yes"
+        ),
+        InlineKeyboardButton(
+            "❌ No",
+            callback_data="shake_no"
+        )
+    ]]
+
+    await app.bot.send_message(
+        chat_id=CHAT_ID,
+        text="🥤 Breakfast Shake completed?",
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
+
+# ---------------- BUTTONS ----------------
 
 async def button(
     update: Update,
@@ -79,6 +98,8 @@ async def button(
     query = update.callback_query
 
     await query.answer()
+
+    # WALK YES
 
     if query.data == "walk_yes":
 
@@ -99,25 +120,27 @@ async def button(
             "✅ Morning Walk Recorded"
         )
 
+    # WALK NO
+
     elif query.data == "walk_no":
 
         keyboard = [[
             InlineKeyboardButton(
                 "💼 Busy",
-                callback_data="reason_busy"
+                callback_data="walk_busy"
             ),
             InlineKeyboardButton(
                 "😴 Lazy",
-                callback_data="reason_lazy"
+                callback_data="walk_lazy"
             )
         ],[
             InlineKeyboardButton(
                 "🌧️ Weather",
-                callback_data="reason_weather"
+                callback_data="walk_weather"
             ),
             InlineKeyboardButton(
                 "🤷 Other",
-                callback_data="reason_other"
+                callback_data="walk_other"
             )
         ]]
 
@@ -126,12 +149,22 @@ async def button(
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
 
-    elif query.data.startswith("reason_"):
+    # WALK REASONS
+
+    elif query.data.startswith("walk_"):
 
         reason = query.data.replace(
-            "reason_",
+            "walk_",
             ""
         )
+
+        if reason not in [
+            "busy",
+            "lazy",
+            "weather",
+            "other"
+        ]:
+            return
 
         cursor.execute("""
         INSERT INTO tasks
@@ -150,6 +183,90 @@ async def button(
             f"❌ Walk Missed\nReason: {reason}"
         )
 
+    # SHAKE YES
+
+    elif query.data == "shake_yes":
+
+        cursor.execute("""
+        INSERT INTO tasks
+        (date, task, status, reason)
+        VALUES (
+            date('now'),
+            'Breakfast Shake',
+            'YES',
+            ''
+        )
+        """)
+
+        conn.commit()
+
+        await query.edit_message_text(
+            "✅ Breakfast Shake Recorded"
+        )
+
+    # SHAKE NO
+
+    elif query.data == "shake_no":
+
+        keyboard = [[
+            InlineKeyboardButton(
+                "💼 Busy",
+                callback_data="shake_busy"
+            ),
+            InlineKeyboardButton(
+                "😴 Lazy",
+                callback_data="shake_lazy"
+            )
+        ],[
+            InlineKeyboardButton(
+                "🤢 Not Hungry",
+                callback_data="shake_hungry"
+            ),
+            InlineKeyboardButton(
+                "🤷 Other",
+                callback_data="shake_other"
+            )
+        ]]
+
+        await query.edit_message_text(
+            "Why did you miss the shake?",
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
+
+    # SHAKE REASONS
+
+    elif query.data.startswith("shake_"):
+
+        reason = query.data.replace(
+            "shake_",
+            ""
+        )
+
+        if reason not in [
+            "busy",
+            "lazy",
+            "hungry",
+            "other"
+        ]:
+            return
+
+        cursor.execute("""
+        INSERT INTO tasks
+        (date, task, status, reason)
+        VALUES (
+            date('now'),
+            'Breakfast Shake',
+            'NO',
+            ?
+        )
+        """, (reason,))
+
+        conn.commit()
+
+        await query.edit_message_text(
+            f"❌ Shake Missed\nReason: {reason}"
+        )
+
 # ---------------- TEST LOOP ----------------
 
 async def startup(app):
@@ -161,6 +278,10 @@ async def startup(app):
         await asyncio.sleep(15)
 
         await ask_walk(app)
+
+        await asyncio.sleep(20)
+
+        await ask_shake(app)
 
     asyncio.create_task(
         test_loop()
